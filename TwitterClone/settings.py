@@ -103,6 +103,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+#Swagger Issue: Re-enabling the Core API schema:
+REST_FRAMEWORK = {'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

@@ -1,3 +1,7 @@
 *.pdf
-*/__pycache__/*
-*/migrations/*
+*/__pycache__
+*/*/__pycache__
+*/migrations
+*/*/migrations
+*.pyc
+db.sqlite3

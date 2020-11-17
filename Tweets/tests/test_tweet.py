@@ -4,7 +4,8 @@ from TUsers.models import TUser
 
 class TweetsTestCase(TestCase):
     def setUp(self):
-        testUser=TUser(username="mark_cuban")
-        TCtweets.user.add(testUser)
+        user1 = TUser.objects.create(username="lori",password="sharktank",country="USA")
+        TCtweets.objects.create(username=user1,tweet_text="Hi there!")
     def test_create_tweet(self):
-        self.assertEqual("Hi there!",TCtweets.objects.get(pk=1))
+        user1 = TUser.objects.get(username='lori')
+        self.assertEqual("Hi there!",TCtweets.objects.get(username=user1).tweet_text)

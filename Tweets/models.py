@@ -7,7 +7,7 @@ class TCtweets(models.Model):
     tweet_text = models.CharField(max_length=100,null=True)
     time = models.CharField(max_length=50,default=get_cur_time())
     retweet = models.ManyToManyField("self")
-    like = models.IntegerField()
+    like = models.IntegerField(null=True)
     comment = models.ManyToManyField("self")
 
     def __str__(self):
