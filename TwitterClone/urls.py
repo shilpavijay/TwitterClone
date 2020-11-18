@@ -18,11 +18,11 @@ from django.urls import path,include
 from rest_framework import routers, serializers, viewsets
 from rest_framework_swagger.views import get_swagger_view
 
-schema_view = get_swagger_view(title='Pastebin API')
+schema_view = get_swagger_view(title='Twitter Clone API')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('docs/',schema_view),
-    path('login/', include('TUsers.urls')),
+    path('', include('TUsers.urls')),
 ]
 
