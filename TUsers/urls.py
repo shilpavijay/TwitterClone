@@ -8,10 +8,9 @@ urlpatterns = [
     path('signup/', views.AccountSignup),
     path('users/',views.users),
     path('<str:username>/account', views.AccountUpdate),
-    # path('auth', views.AuthToken),
+    # path('auth/', views.Authentication),
     path('<str:loggedin_user>/<str:user>/follow', views.FollowUser),
-    # path('<str:username>/followers', views.GetFollowers),
-    # path('<str:username>/following', views.GetFollowing),
-    # path('api/
+    path('<str:username>/followers', views.GetFollowers),
+    path('<str:username>/following', views.GetFollowing),
     # block_users/', views.block_users),
 ]

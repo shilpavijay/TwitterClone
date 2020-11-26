@@ -59,3 +59,22 @@ def FollowUser(request,loggedin_user,user):
         return Response("Follow Request Updated", status=status.HTTP_201_CREATED)
     except:
         return Response("Request Failed", status=status.HTTP_400_BAD_REQUEST)    
+
+@api_view(['POST'])
+def Authentication(request):
+    data = request.query_params
+    pass
+
+@api_view(['GET'])
+def GetFollowers(request,username):
+    user = TUser.objects.get(username=username)
+    followers = user.followers.all()
+    serializer = TUserSerializer(followers, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def GetFollowing(request,username):
+    user = TUser.objects.get(username=username)
+    following = user.following.all()
+    serializer = TUserSerializer(following, many=True)
+    return Response(serializer.data)    

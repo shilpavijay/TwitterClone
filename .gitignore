@@ -5,7 +5,7 @@
 */migrations
 */*/migrations
 *.pyc
-/db.sqlite3
+*.sqlite3
 TUsers/tests/__pycache__/*
 Tweets/tests/__pycache__/*
 TwitterClone/__pycache__/*
