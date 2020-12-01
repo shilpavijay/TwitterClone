@@ -1,7 +1,5 @@
 from django.shortcuts import render
-from django.conf.urls import url
 from TUsers.models import TUser
-from django.shortcuts import render
 from django.http import HttpResponse,QueryDict
 from rest_framework import status
 from rest_framework.decorators import api_view

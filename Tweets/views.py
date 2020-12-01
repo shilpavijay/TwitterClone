@@ -1,5 +1,13 @@
 from django.shortcuts import render
 from datetime import datetime
+from django.shortcuts import render
+from Tweets.models import TCtweets
+from django.http import HttpResponse,QueryDict
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from TUsers.serializer import TUserSerializer
 
-# Create your views here.
-def get_cur_time(): return datetime.now().strftime('%m/%d/%Y %I:%M:%S %p')
+@api_view(['POST'])
+def CreateTweet(request):
+    pass
