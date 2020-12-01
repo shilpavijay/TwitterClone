@@ -9,12 +9,11 @@ Method Endpoint Description
 POST /account Signup using a simple username & password
 PUT /account Update info like region, email etc
 POST /auth Get authentication token
-GET / Paginated timeline of the authenticated user
 POST /{user_id}/follow Follow the user, identified by a user_id
 GET /{user_id}/following List the users who the user is following
 GET /{user_id}/followers List the users who is the following the user
-GET /{user_id} Paginated timeline of a user, identified by a user_id
 POST /tweet Create a tweet for the authenticated user
+GET /{user_id} Paginated timeline of a user, identified by a user_id
 DELETE /tweet/{tweet_id} Delete the tweet, identified by a tweet_id
 GET /tweet/{tweet_id} Show the tweet & its replies, if any
 PUT /tweet/{tweet_id}/reply Reply to a tweet, identified by a tweet_id
@@ -30,3 +29,5 @@ Good to have:
 Notifications
 Recommendations
 Logs (time taken, memory consumption etc)
+
+- Login verificatin before calling other APIss

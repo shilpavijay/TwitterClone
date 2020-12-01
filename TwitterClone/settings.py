@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import datetime
+import uuid
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -104,14 +106,18 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 #Swagger Issue: Re-enabling the Core API schema:
-REST_FRAMEWORK = {'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
-        'DEFAULT_PARSER_CLASSES': [
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
         'rest_framework.parsers.JSONParser',
-    ]
+    ],
+    
 }
 
+#RANDOM AUTHENTICATION TOKEN GENERATOR
+AUTH_TOKEN = uuid.uuid4().hex.upper()
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
