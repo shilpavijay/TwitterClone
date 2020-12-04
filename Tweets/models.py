@@ -11,3 +11,4 @@ class TCtweets(models.Model):
     retweet = models.ManyToManyField("self")
     like = models.IntegerField(null=True)
     reply = models.ManyToManyField("self")     
+    comment = models.CharField(max_length=100,null=True)

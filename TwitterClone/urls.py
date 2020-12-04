@@ -24,6 +24,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('docs/',schema_view),
     path('', include('TUsers.urls')),
-    path('home/', include('Tweets.urls')),
+    path('tweet/', include('Tweets.urls')),
 ]
 
