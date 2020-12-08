@@ -11,6 +11,10 @@ import logging
 import datetime
 from django.conf import settings
 import jwt
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='debug.log', encoding='utf-8', level=logging.DEBUG)
 
 EXP_TIME = datetime.timedelta(minutes=5)
 
@@ -19,8 +23,8 @@ def _get_token(request=None):
 
 @api_view(['POST'])
 def GetToken(request):
-    user = request.query_params['username']
-    pwd = request.query_params['password']
+    user = request.query_params.get('username',None)
+    pwd = request.query_params.get('password',None)
     try:
         user = TUser.objects.get(username=user,password=pwd)
         if user:

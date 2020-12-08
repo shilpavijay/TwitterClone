@@ -30,4 +30,4 @@ Notifications
 Recommendations
 Logs (time taken, memory consumption etc)
 
-- Login verificatin before calling other APIss
+- Login verificatin before calling other APIs

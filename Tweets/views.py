@@ -7,39 +7,67 @@ from django.http import HttpResponse,QueryDict
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from Tweets.serializer import TCtweetsSerializer
+from Tweets.serializer import TCtweetsSerializer,TCValidator
 from django.core.paginator import Paginator
+import logging
+import json
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='debug.log', encoding='utf-8', level=logging.DEBUG)
 
 def get_user_obj(user):
     return TUser.objects.get(username=user)
 
 @api_view(['POST'])
 def CreateTweet(request):
-    username = request.query_params.get('username')
-    try:
-        new_tweet = TCtweets()
-        new_tweet.username = get_user_obj(username)
-        new_tweet.tweet_text = request.query_params.get('tweet_text')
-        new_tweet.save()
-        return Response("Tweet Created", status=status.HTTP_201_CREATED)
-    except:
-        return Response("User Does not exist", status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['GET'])    
-def all_tweets(request):
-    if request.method == 'GET':
-        tweets = TCtweets.objects.all()
-        serializer = TCtweetsSerializer(tweets, many=True)
-        return Response(serializer.data)    
+    '''
+    Purpose: Creates a new Tweet
+    Input: 
+    username: (mandatory) <str> Account user
+    tweet_text: (mandatory) <str> Tweet
+    Output: TCtweet Object of the created tweet
+    '''
+    if request.method == "POST":
+        username = request.query_params.get('username')
+        text = request.query_params.get('tweet_text')
+        validate = TCValidator(request.query_params,request.FILES)
+        if not validate.is_valid():
+            error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                        'Error_Message': "Invalid username or tweet_text"}
+            logger.warning(error)                    
+            return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST)
+        else:
+            try:
+                user = get_user_obj(username)
+                new_tweet = TCtweets(username=user,tweet_text=text)
+                new_tweet.save()
+                serializer = TCtweetsSerializer(new_tweet)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except:
+                error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                            'Error_Message': "User Does not exist"}
+                logger.warning(error)                    
+                return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def Timeline(request,username):
-    page_no = request.query_params.get('page')
-    tweets = TCtweets.objects.filter(username=get_user_obj(username))
-    paginator = Paginator(tweets,10) #shows 10 tweets per page
-    tweet_objs = paginator.get_page(page_no)
-    serializer = TCtweetsSerializer(tweet_objs,many=True)
-    return Response(serializer.data)
+    '''
+    Purpose: Returns the Timeline of the User in a Paginated Fashion
+    Input: 
+    Output:
+    '''
+    try:
+        page_no = request.query_params.get('page')
+        tweets = TCtweets.objects.filter(username=get_user_obj(username))
+        paginator = Paginator(tweets,10) #shows 10 tweets per page
+        tweet_objs = paginator.get_page(page_no)
+        serializer = TCtweetsSerializer(tweet_objs,many=True)
+        return Response(serializer.data)
+    except:
+        error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                    'Error_Message': "No more Tweets to show"}
+        logger.warning(error)                    
+        return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST) 
 
 @api_view(['DELETE'])
 def DeleteTweet(request,tweet_id):

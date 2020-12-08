@@ -6,7 +6,9 @@ requirements.txt
 */migrations
 */*/migrations
 *.pyc
-*.sqlite3
+db.sqlite3
 TUsers/tests/__pycache__/*
 Tweets/tests/__pycache__/*
 TwitterClone/__pycache__/*
+feedback.md
+debug.log
