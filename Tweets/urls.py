@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('create', views.CreateTweet),
-    path('<str:username>', views.Timeline), 
+    path('<str:username>/', views.Timeline), 
     path('<int:tweet_id>/delete', views.DeleteTweet),
     path('<int:tweet_id>/', views.ShowTweet), 
     path('<int:tweet_id>/reply', views.Reply),
