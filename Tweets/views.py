@@ -7,13 +7,13 @@ from django.http import HttpResponse,QueryDict
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from Tweets.serializer import TCtweetsSerializer,TCValidator
+from Tweets.serializer import TCtweetsSerializer,TCValidator,ReplyValidator,RetweetValidator
 from django.core.paginator import Paginator
-import logging
 import json
+import logging
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(filename='debug.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='debug.log',level=logging.DEBUG)
 
 def get_user_obj(user):
     #Returns User Objects corresponding to the username
@@ -33,11 +33,10 @@ def CreateTweet(request):
         username = request.query_params.get('username')
         text = request.query_params.get('tweet_text')
         validate = TCValidator(request.query_params,request.FILES)
-
         if not validate.is_valid():
             error = {'Error_code': status.HTTP_400_BAD_REQUEST,
                         'Error_Message': "Invalid username or tweet_text"}
-            logger.warning(error)                    
+            logger.error(error)                    
             return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -49,7 +48,7 @@ def CreateTweet(request):
         except:
             error = {'Error_code': status.HTTP_400_BAD_REQUEST,
                         'Error_Message': "User Does not exist"}
-            logger.warning(error)                    
+            logger.error(error)                    
             return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
@@ -79,7 +78,7 @@ def Timeline(request,username):
     except Exception as e:
         error = {'Error_code': status.HTTP_400_BAD_REQUEST,
                     'Error_Message': "No Tweets to show"}
-        logger.warning(e)                    
+        logger.error(e)                    
         return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST) 
 
 @api_view(['DELETE'])
@@ -97,63 +96,115 @@ def DeleteTweet(request,tweet_id):
     except Exception as e:
         error = {'Error_code': status.HTTP_400_BAD_REQUEST,
                     'Error_Message': "This tweet no longer exists"}
-        logger.warning(e)    
+        logger.error(e)    
         return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST)  
 
 @api_view(['GET'])
 def ShowTweet(request,tweet_id):
+    '''
+    Purpose: displays the tweet with the id in the URL and its replies
+    Input: None  
+    Output: Tweets and its replies
+    '''
     try:
-        print(tweet_id)
         tweet = TCtweets.objects.filter(id=tweet_id)
-        print(tweet)
         replies = TCtweets.objects.get(id=tweet_id).reply.all()
         tweetNreply = tweet.union(replies)
         serializer = TCtweetsSerializer(tweetNreply,many=True)
         return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
     except Exception as e:
-        return Response("Error retreiving the tweet: "+str(e), status=status.HTTP_400_BAD_REQUEST)
+        logger.error(e)
+        error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                    'Error_Message': "This tweet no longer exists"}
+        return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT'])
 def Reply(request,tweet_id):
+    '''
+    Purpose: Reply to the tweet with the id in the URL
+    Input: username (mandatory) <str> Account user
+           reply_text (mandatory) <str> Reply  
+    Output: Replied tweet object
+    '''
     try:
-        user = request.query_params.get('username')
-        reply = request.query_params.get('reply')
-        reply_tweet = TCtweets()
-        reply_tweet.username = get_user_obj(user)
-        reply_tweet.tweet_text = reply
+        user = request.query_params.get('username',None)
+        reply = request.query_params.get('reply_text',None)
+        validate = ReplyValidator(request.query_params,request.FILES)
+        if not validate.is_valid():
+            error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                        'Error_Message': "Invalid username or reply_text"}
+            logger.error(error)                    
+            return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST)
+
+        user =get_user_obj(user)
+        reply_tweet = TCtweets(username=user,tweet_text=reply)
         reply_tweet.save()
         tweet = TCtweets.objects.get(id=tweet_id)
         tweet.reply.add(reply_tweet)
         tweet.save()
-        return Response("Reply Saved", status=status.HTTP_204_NO_CONTENT)
+        serializer = TCtweetsSerializer(reply_tweet)
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
     except Exception as e:
-        return Response("An Error occured: "+str(e), status=status.HTTP_400_BAD_REQUEST)  
+        error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                        'Error_Message': "Error saving the reply"}
+        logger.error(e)                    
+        return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST) 
 
 @api_view(['PUT'])
 def Retweet(request,tweet_id):
+    '''
+    Purpose: Retweet the tweet with the id in the URL
+    Input: username (mandatory) <str> Account user
+           comment (optional) <str> Comment  
+    Output: tweet object with comment
+    '''
     try:
-        user = request.query_params.get('username')
-        comment = request.query_params.get('comment')
-        reply_tweet = TCtweets()
-        reply_tweet.username = get_user_obj(user)
-        reply_tweet.tweet_text = TCtweets.objects.get(id=tweet_id).tweet_text
-        reply_tweet.comment = comment
+        user = request.query_params.get('username',None)
+        comment = request.query_params.get('comment',None)
+        validate = RetweetValidator(request.query_params,request.FILES)
+        if not validate.is_valid():
+            error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                        'Error_Message': "Invalid username"}
+            logger.error(error)                    
+            return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST)
+
+        tweet_text = TCtweets.objects.get(id=tweet_id).tweet_text
+        reply_tweet = TCtweets(username = get_user_obj(user),tweet_text=tweet_text,comment=comment)
         reply_tweet.save()
-        return Response("Retweet-ed", status=status.HTTP_204_NO_CONTENT)
+        tweet= TCtweets.objects.get(id=tweet_id)
+        tweet.retweet.add(get_user_obj(user))
+        tweet.save()
+        serializer = TCtweetsSerializer(reply_tweet)
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
     except Exception as e:
-        return Response("An Error occured: "+str(e), status=status.HTTP_400_BAD_REQUEST)  
+        error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                        'Error_Message': "Error retweeting!"}
+        logger.error(e)                    
+        return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST) 
 
 @api_view(['PUT'])
 def Like(request,tweet_id):
+    '''
+    Purpose: Like the tweet with the id in the URL
+    Input: username (mandatory) <str> Account user 
+    Output: tweet object that was liked
+    '''
     try:
+        user = request.query_params.get('username',None)
+        validate = RetweetValidator(request.query_params,request.FILES)
+        if not validate.is_valid():
+            error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                        'Error_Message': "Invalid username"}
+            logger.error(error)                    
+            return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST)
+
         tweet = TCtweets.objects.get(id=tweet_id)
-        # first_like = 1
-        tweet.like = tweet.like+1 if tweet.like != None else 1
+        tweet.like.add(get_user_obj(user))
         tweet.save()
-        return Response("Liked!", status=status.HTTP_204_NO_CONTENT)
+        serializer = TCtweetsSerializer(tweet)
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
     except Exception as e:
-        return Response("Error: "+str(e), status=status.HTTP_400_BAD_REQUEST) 
-
-
-
-    
+        error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                        'Error_Message': "Error liking the tweet!"}
+        logger.error(e)                    
+        return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST) 

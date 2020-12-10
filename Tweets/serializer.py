@@ -9,4 +9,11 @@ class TCtweetsSerializer(serializers.ModelSerializer):
 
 class TCValidator(forms.Form) :
     username = forms.CharField()
-    tweet_text = forms.CharField()           
+    tweet_text = forms.CharField()
+
+class ReplyValidator(forms.Form):
+    username = forms.CharField()
+    reply_text = forms.CharField()   
+
+class RetweetValidator(forms.Form):
+    username = forms.CharField() 
