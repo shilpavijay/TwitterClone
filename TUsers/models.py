@@ -10,3 +10,4 @@ class TUser(models.Model):
     modified_time = models.CharField(max_length=50,default=get_cur_time)
     following = models.ManyToManyField('self',related_name='followers',symmetrical=False,blank=True)
     blocked = models.BooleanField(default=False)
+    token = models.CharField(max_length=10000,null=True)
