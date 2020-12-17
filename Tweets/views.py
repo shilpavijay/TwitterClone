@@ -76,7 +76,7 @@ def Timeline(request,username):
             page_num = paginator.get_page(page_no)
             tweet_objs = page_num.object_list 
             serializer = TCtweetsSerializer(tweet_objs,many=True)
-            return Response(serializer.data)
+            return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e:
             error = {'Error_code': status.HTTP_400_BAD_REQUEST,
                         'Error_Message': "No Tweets to show"}
@@ -100,7 +100,7 @@ def DeleteTweet(request,tweet_id=None):
         if is_autherized(request,username):
             serializer = TCtweetsSerializer(tweet)
             tweet.delete()
-            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             error = {'Error_code': status.HTTP_400_BAD_REQUEST,
                                 'Error_Message': "Authentication failed. Please login"}
@@ -125,7 +125,7 @@ def ShowTweet(request,tweet_id=None):
             replies = TCtweets.objects.get(id=tweet_id).reply.all()
             tweetNreply = tweet.union(replies)
             serializer = TCtweetsSerializer(tweetNreply,many=True)
-            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             error = {'Error_code': status.HTTP_400_BAD_REQUEST,
                                 'Error_Message': "Authentication failed. Please login"}
@@ -161,7 +161,7 @@ def Reply(request,tweet_id=None):
             tweet.reply.add(reply_tweet)
             tweet.save()
             serializer = TCtweetsSerializer(reply_tweet)
-            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             error = {'Error_code': status.HTTP_400_BAD_REQUEST,
                                 'Error_Message': "Authentication failed. Please login"}
@@ -198,7 +198,7 @@ def Retweet(request,tweet_id=None):
             tweet.retweet.add(get_user_obj(user))
             tweet.save()
             serializer = TCtweetsSerializer(reply_tweet)
-            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             error = {'Error_code': status.HTTP_400_BAD_REQUEST,
                                 'Error_Message': "Authentication failed. Please login"}
@@ -224,13 +224,13 @@ def Like(request,tweet_id=None):
                         'Error_Message': "Invalid username"}
             logger.error(error)                    
             return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST)
-            
+
         if is_autherized(request,user):
             tweet = TCtweets.objects.get(id=tweet_id)
             tweet.like.add(get_user_obj(user))
             tweet.save()
             serializer = TCtweetsSerializer(tweet)
-            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             error = {'Error_code': status.HTTP_400_BAD_REQUEST,
                                 'Error_Message': "Authentication failed. Please login"}
@@ -240,6 +240,35 @@ def Like(request,tweet_id=None):
                         'Error_Message': "Error liking the tweet!"}
         logger.error(e)                    
         return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST) 
+
+@api_view(['GET'])
+def Search(request):
+    '''
+    Search for a tweet using a hashtag and a region
+    Input:
+    username <str> (mandatory) Account User
+    hashtag <str> (mandatory) text (with hashtag) to search with
+    '''
+    user = request.query_params.get('username')
+    hashtag = request.query_params.get('hashtag')
+    if is_autherized(request,user):
+        try:
+            tweet_match = TCtweets.objects.filter(tweet_text__contains=hashtag[1:])
+            if tweet_match:
+                serializer = TCtweetsSerializer(tweet_match,many=True)
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            else:
+                message = {"Message": "No Match found!"}
+                return Response(message,status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            error = {'Error_code': status.HTTP_204_NO_CONTENT,
+                            'Error_Message': "Please enter a valid search string"}
+            logger.error(e)
+        return Response(error, status=status.HTTP_204_NO_CONTENT)
+    else:
+        error = {'Error_code': status.HTTP_400_BAD_REQUEST,
+                            'Error_Message': "Authentication failed. Please login"}
+        return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def all_tweets(request):

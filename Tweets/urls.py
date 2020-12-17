@@ -9,6 +9,6 @@ urlpatterns = [
     path('<int:tweet_id>/reply', views.Reply),
     path('<int:tweet_id>/retweet', views.Retweet),
     path('<int:tweet_id>/like', views.Like),
+    path('search', views.Search),
     path('all_tweets', views.all_tweets), #debugging
-    # path('search', views.Search),
 ]
