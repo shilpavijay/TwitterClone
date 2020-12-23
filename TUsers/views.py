@@ -136,22 +136,18 @@ def AccountUpdate(request,username):
     country (optional) <str> Country
     Output: User object of the updated user
     '''
-    if is_autherized(request,username):
-        try:
-            country = request.query_params.get('country')
-            user = TUser.objects.get(username=username)
-            user.country = country
-            user.save()
-            serializer = TUserSerializer(user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            error = {'Error_code': status.HTTP_400_BAD_REQUEST,
-                            'Error_Message': "Invalid details"}
-            logger.error("AccountUpdate: Error: "+str(e))
-            return Response(error, status=status.HTTP_400_BAD_REQUEST)
-    else:
+    try:
+        country = request.query_params.get('country')
+        user = TUser.objects.get(username=username)
+        user.country = country
+        user.save()
+        serializer = TUserSerializer(user)
+        logger.error("Account Update successful")
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    except Exception as e:
         error = {'Error_code': status.HTTP_400_BAD_REQUEST,
-                            'Error_Message': "Authentication failed. Please login"}
+                        'Error_Message': "Invalid details"}
+        logger.error("AccountUpdate: Error: "+str(e))
         return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -162,23 +158,18 @@ def FollowUser(request,loggedin_user,user):
     Input: -
     Output: User object of the logged in user
     '''
-    if is_autherized(request,loggedin_user):
-        try:
-            cur_user=TUser.objects.get(username=loggedin_user)
-            fol_user=TUser.objects.get(username=user)
-            cur_user.following.add(fol_user)
-            cur_user.save()
-            serializer = TUserSerializer(cur_user)
-            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            error = {'Error_code': status.HTTP_400_BAD_REQUEST,
-                            'Error_Message': "Request Failed. Invalid Details"}
-            logger.error(e)
-            return Response(error, status=status.HTTP_400_BAD_REQUEST)  
-    else:
+    try:
+        cur_user=TUser.objects.get(username=loggedin_user)
+        fol_user=TUser.objects.get(username=user)
+        cur_user.following.add(fol_user)
+        cur_user.save()
+        serializer = TUserSerializer(cur_user)
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
         error = {'Error_code': status.HTTP_400_BAD_REQUEST,
-                            'Error_Message': "Authentication failed. Please login"}
-        return Response(error, status=status.HTTP_400_BAD_REQUEST)
+                        'Error_Message': "Request Failed. Invalid Details"}
+        logger.error(e)
+        return Response(error, status=status.HTTP_400_BAD_REQUEST)  
 
 
 @api_view(['GET'])
@@ -188,20 +179,15 @@ def GetFollowers(request,username):
     Input: -
     Output: User object of all the following users
     '''
-    if is_autherized(request,username):
-        try:
-            user = TUser.objects.get(username=username)
-            followers = user.followers.all()
-            serializer = TUserSerializer(followers, many=True)
-            return Response(serializer.data)
-        except Exception as e:
-            error = {'Error_code': status.HTTP_400_BAD_REQUEST,
-                            'Error_Message': "User does not exist"}
-            logger.error(e)
-            return Response(error, status=status.HTTP_400_BAD_REQUEST) 
-    else:
+    try:
+        user = TUser.objects.get(username=username)
+        followers = user.followers.all()
+        serializer = TUserSerializer(followers, many=True)
+        return Response(serializer.data)
+    except Exception as e:
         error = {'Error_code': status.HTTP_400_BAD_REQUEST,
-                            'Error_Message': "Authentication failed. Please login"}
+                        'Error_Message': "User does not exist"}
+        logger.error(e)
         return Response(error, status=status.HTTP_400_BAD_REQUEST)            
 
 @api_view(['GET'])
@@ -211,21 +197,16 @@ def GetFollowing(request,username):
     Input: -
     Output: User object of all the followed users
     '''
-    if is_autherized(request,username):
-        try:
-            user = TUser.objects.get(username=username)
-            following = user.following.all()
-            serializer = TUserSerializer(following, many=True)
-            return Response(serializer.data)
-        except Exception as e:
-            error = {'Error_code': status.HTTP_400_BAD_REQUEST,
-                            'Error_Message': "User does not exist"}
-            logger.error(e)
-            return Response(error, status=status.HTTP_400_BAD_REQUEST) 
-    else:
+    try:
+        user = TUser.objects.get(username=username)
+        following = user.following.all()
+        serializer = TUserSerializer(following, many=True)
+        return Response(serializer.data)
+    except Exception as e:
         error = {'Error_code': status.HTTP_400_BAD_REQUEST,
-                            'Error_Message': "Authentication failed. Please login"}
-        return Response(error, status=status.HTTP_400_BAD_REQUEST)  
+                        'Error_Message': "User does not exist"}
+        logger.error(e)
+        return Response(error, status=status.HTTP_400_BAD_REQUEST) 
 
 @api_view(['PUT'])
 def Block_user(request,username):
@@ -234,22 +215,17 @@ def Block_user(request,username):
     Input: -
     Output: Blocked user
     '''
-    if is_autherized(request,username):
-        try:
-            user = TUser.objects.get(username=username)
-            user.blocked = True
-            user.save()
-            serializer = TUserSerializer(user)
-            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            error = {'Error_code': status.HTTP_400_BAD_REQUEST,
-                            'Error_Message': "User does not exist"}
-            logger.error(e)
-            return Response(error, status=status.HTTP_400_BAD_REQUEST) 
-    else:
+    try:
+        user = TUser.objects.get(username=username)
+        user.blocked = True
+        user.save()
+        serializer = TUserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
         error = {'Error_code': status.HTTP_400_BAD_REQUEST,
-                            'Error_Message': "Authentication failed. Please login"}
-        return Response(error, status=status.HTTP_400_BAD_REQUEST)              
+                        'Error_Message': "User does not exist"}
+        logger.error(e)
+        return Response(error, status=status.HTTP_400_BAD_REQUEST)             
 
 @api_view(['GET'])
 def users(request):

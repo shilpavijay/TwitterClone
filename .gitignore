@@ -13,4 +13,4 @@ TwitterClone/__pycache__/*
 feedback.md
 debug.log
 my.cnf
-
+TwitterClone/settings.py

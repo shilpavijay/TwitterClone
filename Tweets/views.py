@@ -72,7 +72,7 @@ def Timeline(request,username):
                 return Response(json.dumps(error), status=status.HTTP_400_BAD_REQUEST)
             
             tweets = TCtweets.objects.filter(username=userObj)
-            paginator = Paginator(tweets,10) #shows 10 tweets per page
+            paginator = Paginator(tweets,5) #shows 5 tweets per page
             page_num = paginator.get_page(page_no)
             tweet_objs = page_num.object_list 
             serializer = TCtweetsSerializer(tweet_objs,many=True)
