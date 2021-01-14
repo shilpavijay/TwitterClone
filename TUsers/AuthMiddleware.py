@@ -23,7 +23,7 @@ class AuthMiddleware(BaseBackend):
         if request.path not in exclusion_list:
             try:
                 urlstr = request.path
-                user = urlstr.split('/')[1]
+                user = urlstr.split('/')[1] #TODO: modify it for /tweet/<>
                 token = request.session.get('authtoken').get('token')
                 payload = jwt.decode(token,settings.AUTH_TOKEN)
                 userObj = TUser.objects.get(username=user)

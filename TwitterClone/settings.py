@@ -80,16 +80,29 @@ WSGI_APPLICATION = 'TwitterClone.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+#PROD:
 DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'twitterclone',
             'USER': 'root',
-            'PASSWORD': 'Scotiger098!',
-            'HOST': 'localhost',
+            'PASSWORD': 'guessme',
+            'HOST': 'db',
             'PORT': '3306',
             },
         }
+
+# DEV
+# DATABASES = {
+# 'default': {
+#     'ENGINE': 'django.db.backends.mysql',
+#     'NAME': 'twitterclone',
+#     'USER': 'root',
+#     'PASSWORD': 'Scotiger098!',
+#     'HOST': 'localhost',
+#     'PORT': '3306',
+#     },
+# }
 
 
 # Password validation
